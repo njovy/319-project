@@ -198,7 +198,7 @@ class Tournament_Json(auth.UserAwareView):
 
         bracket_json = actions.get_json_by_tournament(tournament)
         
-        return jsonify(bracket_json)
+        return bracket_json
 
 class check_email(auth.UserAwareView):
     def get(self):
