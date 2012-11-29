@@ -55,13 +55,31 @@ def get_participants_by_match(match, limit = 200):
 def get_json_by_tournament(tournament):
     top_match = get_top_match_by_tournament(tournament)
     pickled = json.dumps(top_match, cls=models.MatchEncoder)
-    logging.info(pickled)
-    encoded = {"name" : tournament.name, "matches":pickled}
-    return json.dumps(pickled)
+    tournament_json= {"title":tournament.name, "type":tournament.type,"created":tournament.created,"date":tournament.date
+    ,"location":tournament.location,"matches":pickled}
+    encoded = "{\"title\":\""+tournament.name+"\",\"type\":\""+tournament.type+"\",\"matches\":"+pickled+"}"
+    return encoded
+
+# Can participants have different parents?
+def write_player_to_db(player, cur_match):
+    if player is not None and player['seed'] is not None and player['name'] is not None:
+        p1 = models.Participant(
+            seed=player['seed'],
+            name=player['name'],
+            parent=cur_match)
+        cur_match.put()
 
 #TODO: Update the winner and add to the next participants
 def update_match_by_winner(match_id, winner):
+    # Get the selected match by id
     match = models.Match.get_by_id(match_id)
+    participants = get_participants_by_match(match)
+    # If there is a participant, then change the match status to played.
+    # Add the winner to participants of the next match
+    if participants.__contains__(winner):
+        match.has_been_played = True
+        write_player_to_db(winner, match.next_match)
+    # Reload the view page
     return None
 
 def create_tournament(form_data, p_form_data, user):

@@ -114,12 +114,12 @@ class MatchEncoder(json.JSONEncoder):
             if len(participants) > 1:
                 for i in range(len(participants)):
                     users.append({"name":participants[i].name})
-            return {"key":obj.get_entity(),"winner":winner,"children":children,"users":users}
+            #id is not stable here for some reason.
+            return {"id":obj.key().id(),"winner":winner,"children":children,"participants":users,"played":obj.has_been_played}
         else:
             return ""
 
         return json.JSONEncoder.default(self, obj)
-
 
 class Participant(db.Model):
     """
